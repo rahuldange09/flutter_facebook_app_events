@@ -15,6 +15,8 @@ class FacebookAppEvents {
       'fb_mobile_complete_registration';
   static const eventNameViewedContent = 'fb_mobile_content_view';
   static const eventNameRated = 'fb_mobile_rate';
+  static const eventNameAddToCart = 'fb_mobile_add_to_cart';
+  static const eventNameInitiatedCheckout = 'fb_mobile_initiated_checkout';
 
   static const _paramNameValueToSum = "_valueToSum";
   static const paramNameRegistrationMethod = "fb_registration_method";
@@ -32,6 +34,14 @@ class FacebookAppEvents {
   /// Parameter key used to specify an ID for the specific piece of content being logged about.
   /// This could be an EAN, article identifier, etc., depending on the nature of the app.
   static const paramNameContentId = "fb_content_id";
+
+  /// Parameter key used to specify currency used with logged event. E.g. "USD", "EUR", "GBP".
+  /// See <a * href="http://en.wikipedia.org/wiki/ISO_4217">ISO-4217</a> for specific values.
+  static const paramNameCurrency = "fb_currency";
+
+  /// Parameter key used to specify how many items are being processed for an
+  /// EVENT_NAME_INITIATED_CHECKOUT or EVENT_NAME_PURCHASE event.
+  static const paramNameNumItems = "fb_num_items";
 
   /// Clears the current user data
   Future<void> clearUserData() {
@@ -66,6 +76,21 @@ class FacebookAppEvents {
     };
 
     return _channel.invokeMethod<void>('logEvent', _filterOutNulls(args));
+  }
+
+  /// Log Standard Purchase event seprately as Facebook also manages this by seprate method
+  Future<void> logPurchase({
+    @required double valueToSum,
+    @required String currency,
+    Map<String, dynamic> parameters,
+  }) {
+    final args = <String, dynamic>{
+      'parameters': parameters,
+      _paramNameValueToSum: valueToSum,
+      paramNameCurrency: currency,
+    };
+
+    return _channel.invokeMethod<void>('logPurchase', _filterOutNulls(args));
   }
 
   /// Sets user data to associate with all app events.
